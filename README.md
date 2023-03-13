@@ -28,7 +28,9 @@ import * as maptalks from 'maptalks';
 import 'maptalks.flubber';
 ```
 
-### Polygon.prototype.transform(polygon/coordinates/geojson, options, step) `It is similar to animate`
+### methods
+
+- polygon.transform(polygon/coordinates/geojson, options, step) `It is similar to animate`
 
 ```js
 const polygon1 = new Polygon();

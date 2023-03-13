@@ -16,7 +16,7 @@ yarn add maptalks.flubber
 
 ```html
 <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
-<script type="text/javascript" src="../dist/maptalks.flubber.js"></script>
+<script type="text/javascript" src="https://unpkg.com/maptalks.flubber/dist/maptalks.flubber.js"></script>
 ```
 
 ## API

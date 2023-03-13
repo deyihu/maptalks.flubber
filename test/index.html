@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map - Display a map</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+
+    .panel {
+        border-radius: 5px;
+        padding: 10px;
+        position: absolute;
+        z-index: 1;
+        right: 10px;
+        top: 10px;
+        border: 1px solid gray;
+        background-color: white
+    }
+
+    .panel .item {
+        line-height: 40px
+    }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/maptalks/dist/maptalks.css">
+<script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="../dist/maptalks.flubber.js"></script>
+
+<body>
+    <div class="panel">
+
+        <div class="item">
+            <button onclick="transform()">run transform</button>
+        </div>
+        <div class="item">
+            <label>reverse</label><input id="reverse" type="checkbox" />
+        </div>
+        <div class="item">
+            <label>loop</label><input id="loop" type="checkbox" />
+        </div>
+
+
+    </div>
+    <div id="map" class="container"></div>
+
+    <script>
+
+        var map = new maptalks.Map('map', {
+            center: [120.49534808227543, 31.164407781874758],
+            zoom: 10,
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                subdomains: ["a", "b", "c", "d"],
+                attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+            })
+        });
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+        let newGeo, oldGeo, newPolygon, oldPolygon, loop = false, reverse = false;
+        fetch('./export-1678672689471.geojson').then(res => res.json()).then(geojson => {
+            [newPolygon, oldPolygon] = maptalks.GeoJSON.toGeometry(geojson);
+            oldPolygon.options.enableSimplify = false;
+            oldPolygon.setSymbol({
+                polygonOpacity: 0.9,
+                polygonFill: "#EDDBFB",
+                lineWidth: 1,
+                lineColor: '#000'
+            })
+            layer.addGeometry(oldPolygon);
+            newGeo = geojson.features[0];
+            oldGeo = geojson.features[1];
+        })
+
+        function getPolygonCoordiantes(geo) {
+            return geo.geometry.coordinates;
+            // return [coordiantes];
+        }
+
+        function getCoordinates() {
+            if (reverse) {
+                return [getPolygonCoordiantes(newGeo), getPolygonCoordiantes(oldGeo)];
+            }
+            return [getPolygonCoordiantes(oldGeo), getPolygonCoordiantes(newGeo)];
+        }
+
+        function transform() {
+            const [c1, c2] = getCoordinates();
+            oldPolygon.setCoordinates(c1);
+            oldPolygon.transform(c2, { duration: 3000, loop: true }, function (frame) {
+                if (frame.state.playState === 'finished' && loop) {
+                    this.setCoordinates(c1);
+                    transform();
+                }
+            });
+        }
+
+        document.querySelector('#reverse').addEventListener('change', function () {
+            reverse = this.checked;
+        })
+        document.querySelector('#loop').addEventListener('change', function () {
+            loop = this.checked;
+        })
+    </script>
+</body>
+
+</html>
